@@ -1,0 +1,49 @@
+== Auto Saved Window ==
+- Control keys
+  - < Control - O > : Open file
+  - < Control - S > : Save file
+  - < Control - T > : Toggle Top display
+  - < Contro - N > : New window
+  - < Control - Q > : Quit widow, or application(oot)
+  - < Control  H > : Hide or Open All windows
+  - < Drag window > : Move window
+  - < Click Top-Right > : Quit window
+  - < Drag Bottom-Right > : Resize window
+
+First opened window is special: root window (usually this window).
+root window automatically saved to "autosave_0.txt", and will be opend when restart.
+==Please keep avoid to save as "autosave_0.txt" manually.==
+That file will be Overwritten!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
