@@ -2,7 +2,7 @@
 
 A simple and lightweight sticky notes app built with Tkinter.
 
-Supports multiple windows, always-on-top mode, and auto-save window.
+Supports multiple windows, always-on-top mode, and auto-save functionality.
 
 ---
 
@@ -77,7 +77,14 @@ pip install keyboard
 
 * UI customization (colors, fonts)
 * Toggle visibility of control panels
-* Auto save functionality
+* Configurable auto-save
+
+---
+
+## ⬇️ Download
+
+Download the latest version from the Releases page:
+https://github.com/nycodesea/EasySticky/releases
 
 ---
 
