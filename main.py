@@ -1,5 +1,6 @@
 # EasySticky v1.0
 import tkinter as tk
+import tkinter.font as tkfont
 from tkinter import filedialog
 import keyboard
 
@@ -67,6 +68,60 @@ class MemoWindow:
         self.win.bind("<Enter>", show_panels)
         self.win.bind("<Leave>", hide_panels)
 
+        # Right-click Menu
+        self.menu = tk.Menu(self.win, tearoff=0)
+        self.font_name = "Courier"
+        self.font_size = 16
+        self.font_var = tk.StringVar(value=self.font_name)
+        # Font
+        self.common_fonts = [
+            "Courier",
+            "Consolas",
+            "Meiryo",
+            "Yu Gothic Medium",
+            "Arial",
+            "Times New Roman",
+        ]
+        self.all_fonts = sorted(tkfont.families())
+        font_menu = tk.Menu(self.menu, tearoff=0)
+        # Common fonts
+        common_menu = tk.Menu(font_menu, tearoff=0)
+        for f in self.common_fonts:
+            common_menu.add_radiobutton(
+                label=f,
+                font=(f, 12),
+                variable=self.font_var,
+                value=f,
+                command=lambda f=f: self.set_font(f),
+            )
+        font_menu.add_cascade(label="Common Fonts", menu=common_menu)
+
+        # All fonts
+        all_menu = tk.Menu(font_menu, tearoff=0)
+        font_menu.add_separator()
+        for f in self.all_fonts:
+            all_menu.add_radiobutton(
+                label=f,
+                font=(f, 12),
+                variable=self.font_var,
+                value=f,
+                command=lambda f=f: self.set_font(f),
+            )
+        font_menu.add_cascade(label="All Fonts", menu=all_menu)
+        self.menu.add_cascade(label="Font", menu=font_menu)
+
+        # Size
+        self.size_var = tk.IntVar(value=self.font_size)
+        size_menu = tk.Menu(self.menu, tearoff=0)
+        for s in [10, 12, 14, 16, 18, 20, 24]:
+            size_menu.add_radiobutton(
+                label=str(s),
+                variable=self.size_var,
+                value=s,
+                command=lambda s=s: self.set_size(s),
+            )
+
+        self.menu.add_cascade(label="Size", menu=size_menu)
         # --- bind ---
         self.bind_events()
 
@@ -83,10 +138,45 @@ class MemoWindow:
 
         # run autosave
         self.auto_save()
+        # focus
+        self.win.after(100, self.force_focus)
 
     # ======================
     # Functions
     # ======================
+    # focus
+    def force_focus(self):
+        self.win.overrideredirect(False)
+        self.win.update()
+
+        self.win.lift()
+        self.win.attributes("-topmost", True)
+
+        self.text.focus_set()
+
+        self.win.after(50, lambda: self.win.attributes("-topmost", self.topmost))
+        self.win.after(100, lambda: self.win.overrideredirect(True))
+
+    # font
+    def set_font(self, font):
+        self.font_name = font
+        self.font_var.set(font)
+        self.apply_font()
+
+    def set_size(self, size):
+        self.font_size = size
+        self.size_var.set(size)
+        self.apply_font()
+
+    def apply_font(self):
+        self.text.config(font=(self.font_name, self.font_size))
+
+    # Right-click Menu
+    def show_menu(self, event=None):
+        self.font_var.set(self.font_name)
+        self.size_var.set(self.font_size)
+        self.menu.tk_popup(event.x_root, event.y_root)
+
     # Save Ctrl+S
     def save_file(self, event=None):
         path = filedialog.asksaveasfilename(defaultextension=".txt")
@@ -115,7 +205,11 @@ class MemoWindow:
 
     # New window Ctrl+N
     def new_window(self, event=None):
-        MemoWindow(self.win)
+        new = MemoWindow(self.win)
+        new.font_name = self.font_name
+        new.font_size = self.font_size
+        new.size_var.set(new.font_size)
+        new.apply_font()
 
     # Auto Save restricted to root window by self.root_flag
     def auto_save(self):
@@ -171,13 +265,14 @@ class MemoWindow:
         self.close_btn.bind("<Button-1>", self.quit_window)
         self.text.bind("<Button-1>", self.start_move)
         self.text.bind("<B1-Motion>", self.do_move)
+        self.text.bind("<Button-3>", self.show_menu)
 
         self.grip.bind("<Button-1>", self.start_resize)
         self.grip.bind("<B1-Motion>", self.do_resize)
         self.grip.bind("<ButtonRelease-1>", self.stop_resize)
 
 
-# Toggle all windows show/hide by Ctrl+H
+# Toggle all windows show/hide by Ctrl+Shift+H
 all_windows_visible = True
 
 
@@ -185,13 +280,10 @@ def all_windows_show(event=None):
     def _run():
         global all_windows_visible
         all_windows_visible = not all_windows_visible
-        for w in MemoWindow.windows:
+        for i, w in enumerate(MemoWindow.windows):
             if all_windows_visible:
                 w.win.deiconify()
-                w.win.overrideredirect(True)
-                w.win.lift()
-                w.win.focus_force()
-                w.win.attributes("-topmost", w.topmost)
+                w.force_focus()
             else:
                 w.win.overrideredirect(False)
                 w.win.iconify()
@@ -205,5 +297,5 @@ def all_windows_show(event=None):
 if __name__ == "__main__":
     app = MemoWindow()
     # Toggle all windows key
-    keyboard.add_hotkey("ctrl+h", all_windows_show)
+    keyboard.add_hotkey("ctrl+Shift+h", all_windows_show)
     app.win.mainloop()
