@@ -1,4 +1,4 @@
-# EasySticky v1.1
+# EasySticky_linux_v0.1
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog
