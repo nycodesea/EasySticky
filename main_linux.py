@@ -1,7 +1,8 @@
-# EasySticky_linux_v1.0
+# EasySticky_linux_v1.1
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog
+from tkinter import colorchooser
 
 
 class MemoWindow:
@@ -49,10 +50,11 @@ class MemoWindow:
         )
         self.text.pack(expand=True, fill="both")
 
-        # Right-click Menu
-        self.menu = tk.Menu(self.win, tearoff=0)
+        # Default Font
         self.font_name = "Courier"
         self.font_size = 16
+        # Right-click Menu
+        self.menu = tk.Menu(self.win, tearoff=0)
         self.font_var = tk.StringVar(value=self.font_name)
         # Font
         self.common_fonts = [
@@ -106,6 +108,13 @@ class MemoWindow:
         # --- bind ---
         self.bind_events()
 
+        # Color settings
+        color_menu = tk.Menu(self.menu, tearoff=0)
+
+        color_menu.add_command(label="Background Color", command=self.choose_bg_color)
+        color_menu.add_command(label="Font Color", command=self.choose_font_color)
+        self.menu.add_cascade(label="Color", menu=color_menu)
+
         # Add to Window list
         MemoWindow.windows.append(self)
         # Load Auto saved file
@@ -125,6 +134,20 @@ class MemoWindow:
     # ======================
     # Functions
     # ======================
+    # Color Chooser
+    def choose_bg_color(self) -> None:
+        color = colorchooser.askcolor(title="Choose Background Color")
+        if color[1]:
+            self.bg_color = color[1]
+            self.text.config(bg=self.bg_color)
+            self.container.config(bg=self.bg_color)
+
+    def choose_font_color(self) -> None:
+        color = colorchooser.askcolor(title="Choose Font Color")
+        if color[1]:
+            self.font_color = color[1]
+            self.text.config(fg=self.font_color)
+
     # focus
     def force_focus(self):
         # self.win.overrideredirect(False)
