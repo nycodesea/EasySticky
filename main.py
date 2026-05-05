@@ -128,8 +128,6 @@ class MemoWindow:
 
         # Color settings
         color_menu = tk.Menu(self.menu, tearoff=0)
-        bg_color_menu = tk.Menu(color_menu, tearoff=0)
-        font_color_menu = tk.Menu(color_menu, tearoff=0)
 
         color_menu.add_command(label="Background Color", command=self.choose_bg_color)
         color_menu.add_command(label="Font Color", command=self.choose_font_color)
@@ -158,13 +156,15 @@ class MemoWindow:
     def choose_bg_color(self) -> None:
         color = colorchooser.askcolor(title="Choose Background Color")
         if color[1]:
-            self.text.config(bg=color[1])
-            self.container.config(bg=color[1])
+            self.bg_color = color[1]
+            self.text.config(bg=self.bg_color)
+            self.container.config(bg=self.bg_color)
 
     def choose_font_color(self) -> None:
         color = colorchooser.askcolor(title="Choose Font Color")
         if color[1]:
-            self.text.config(fg=color[1])
+            self.font_color = color[1]
+            self.text.config(fg=self.font_color)
 
     # focus
     def force_focus(self):
