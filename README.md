@@ -1,4 +1,4 @@
-# EasySticky(for WIN)
+# EasySticky
 
 A simple and lightweight sticky notes app built with Tkinter.
 
@@ -39,13 +39,14 @@ python main.py
 * **Ctrl + T** : Toggle always-on-top
 * **Ctrl + N** : Open new memo window
 * **Ctrl + Q** : Close window (or exit app if root)
-* **Ctrl + Shift + H** : Show / hide all windows
+* **Ctrl + Shift + H** : Show(for WIN) / Hide all windows
 
 ### Mouse
 
 * **Drag (text area)** : Move window
 * **Drag bottom-right** : Resize window
 * **Click top-right** : Close window
+* **Right Click** : Setting menu
 
 ---
 
