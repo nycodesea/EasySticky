@@ -1,4 +1,4 @@
-# EasySticky_linux_v0.1
+# EasySticky_linux_v1.0
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog
@@ -225,25 +225,20 @@ class MemoWindow:
         self.text.bind("<B1-Motion>", self.do_move)
         self.text.bind("<Button-3>", self.show_menu)
 
-        self.win.bind("<Control-Shift-H>", all_windows_show)
-        self.text.bind("<Control-Shift-H>", all_windows_show)
+        self.text.bind("<Control-Shift-H>", all_windows_hide)
 
 
-# Toggle all windows show/hide by Ctrl+Shift+H
-all_windows_visible = True
-
-
-def all_windows_show(event=None):
+# Hide all windows
+def all_windows_hide(event=None):
     def _run():
-        global all_windows_visible
-        all_windows_visible = not all_windows_visible
-        for i, w in enumerate(MemoWindow.windows):
-            if all_windows_visible:
+        any_visible = any(w.win.winfo_viewable() for w in MemoWindow.windows)
+        if any_visible:
+            for w in MemoWindow.windows:
+                w.win.iconify()
+        else:
+            for w in MemoWindow.windows:
                 w.win.deiconify()
                 w.force_focus()
-            else:
-                # w.win.overrideredirect(False)
-                w.win.iconify()
 
     if MemoWindow.windows:
         MemoWindow.windows[0].win.after(0, _run)
