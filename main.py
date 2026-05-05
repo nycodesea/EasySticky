@@ -1,5 +1,6 @@
 # EasySticky v1.1
 import tkinter as tk
+from tkinter import colorchooser
 import tkinter.font as tkfont
 from tkinter import filedialog
 import keyboard
@@ -68,10 +69,11 @@ class MemoWindow:
         self.win.bind("<Enter>", show_panels)
         self.win.bind("<Leave>", hide_panels)
 
-        # Right-click Menu
-        self.menu = tk.Menu(self.win, tearoff=0)
+        # Default font
         self.font_name = "Courier"
         self.font_size = 16
+        # Right-click Menu
+        self.menu = tk.Menu(self.win, tearoff=0)
         self.font_var = tk.StringVar(value=self.font_name)
         # Font
         self.common_fonts = [
@@ -98,7 +100,6 @@ class MemoWindow:
 
         # All fonts
         all_menu = tk.Menu(font_menu, tearoff=0)
-        font_menu.add_separator()
         for f in self.all_fonts:
             all_menu.add_radiobutton(
                 label=f,
@@ -125,6 +126,15 @@ class MemoWindow:
         # --- bind ---
         self.bind_events()
 
+        # Color settings
+        color_menu = tk.Menu(self.menu, tearoff=0)
+        bg_color_menu = tk.Menu(color_menu, tearoff=0)
+        font_color_menu = tk.Menu(color_menu, tearoff=0)
+
+        color_menu.add_command(label="Background Color", command=self.choose_bg_color)
+        color_menu.add_command(label="Font Color", command=self.choose_font_color)
+        self.menu.add_cascade(label="Color", menu=color_menu)
+
         # Add to Window list
         MemoWindow.windows.append(self)
         # Load Auto saved file
@@ -144,6 +154,18 @@ class MemoWindow:
     # ======================
     # Functions
     # ======================
+    # Color Chooser
+    def choose_bg_color(self) -> None:
+        color = colorchooser.askcolor(title="Choose Background Color")
+        if color[1]:
+            self.text.config(bg=color[1])
+            self.container.config(bg=color[1])
+
+    def choose_font_color(self) -> None:
+        color = colorchooser.askcolor(title="Choose Font Color")
+        if color[1]:
+            self.text.config(fg=color[1])
+
     # focus
     def force_focus(self):
         self.win.overrideredirect(False)
