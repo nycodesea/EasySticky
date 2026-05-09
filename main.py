@@ -31,6 +31,26 @@ class MemoWindow:
         # Padding
         self.container = tk.Frame(self.win, bg="#e4e093", padx=5, pady=5)
         self.container.pack(expand=True, fill="both")
+
+        # root marker
+        if self.root_flag:
+            self.corner = tk.Canvas(
+                self.win,
+                width=18,
+                height=18,
+                bg=darker(self.container["bg"], 14),
+                highlightthickness=0,
+            )
+
+            self.corner.place(x=0, y=0)
+
+            self.corner.create_polygon(
+                0, 0, 18, 0, 0, 18, fill=darker(self.corner["bg"], 20), outline=""
+            )
+
+        # Default font
+        self.font_name = "Courier"
+        self.font_size = 16
         # Text
         self.text = tk.Text(
             self.container,
@@ -41,9 +61,9 @@ class MemoWindow:
             borderwidth=0,
             highlightthickness=0,
             undo=True,
-            font=("Courier", 16),
+            font=(self.font_name, self.font_size),
         )
-        self.text.pack(expand=True, fill="both")
+        self.text.pack(expand=True, fill="both", padx=5, pady=5)
 
         # Close guide panel
         self.close_btn = tk.Label(
@@ -69,9 +89,6 @@ class MemoWindow:
         self.win.bind("<Enter>", show_panels)
         self.win.bind("<Leave>", hide_panels)
 
-        # Default font
-        self.font_name = "Courier"
-        self.font_size = 16
         # Right-click Menu
         self.menu = tk.Menu(self.win, tearoff=0)
         self.font_var = tk.StringVar(value=self.font_name)
@@ -159,6 +176,12 @@ class MemoWindow:
             self.bg_color = color[1]
             self.text.config(bg=self.bg_color)
             self.container.config(bg=self.bg_color)
+            if self.root_flag:
+                self.corner.config(bg=darker(self.bg_color, 14))
+                self.corner.delete("all")
+                self.corner.create_polygon(
+                    0, 0, 18, 0, 0, 18, fill=darker(self.bg_color, 20), outline=""
+                )
 
     def choose_font_color(self) -> None:
         color = colorchooser.askcolor(title="Choose Font Color")
@@ -311,6 +334,17 @@ def all_windows_show(event=None):
                 w.win.iconify()
 
     MemoWindow.windows[0].win.after(0, _run)
+
+
+# Darker color
+def darker(color, amount=18):
+    color = color.lstrip("#")
+
+    r = max(0, int(color[0:2], 16) - amount)
+    g = max(0, int(color[2:4], 16) - amount)
+    b = max(0, int(color[4:6], 16) - amount)
+
+    return f"#{r:02x}{g:02x}{b:02x}"
 
 
 # ======================
