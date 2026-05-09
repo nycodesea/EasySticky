@@ -38,7 +38,7 @@ class MemoWindow:
                 self.win,
                 width=18,
                 height=18,
-                bg=darker(self.container["bg"], 14),
+                bg=darker(self.container["bg"], 12),
                 highlightthickness=0,
             )
 
@@ -101,7 +101,7 @@ class MemoWindow:
             "Arial",
             "Times New Roman",
         ]
-        self.all_fonts = sorted(tkfont.families())
+        self.all_fonts = sorted(f for f in tkfont.families() if not f.startswith("@"))
         font_menu = tk.Menu(self.menu, tearoff=0)
         # Common fonts
         common_menu = tk.Menu(font_menu, tearoff=0)
