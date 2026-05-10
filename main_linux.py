@@ -1,4 +1,4 @@
-# EasySticky_linux_v1.1
+# EasySticky_linux_v1.2
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog
@@ -36,6 +36,26 @@ class MemoWindow:
             self.win, bg="#e4e093", padx=5, pady=5, bd=0, highlightthickness=0
         )
         self.container.pack(expand=True, fill="both")
+
+        # root marker
+        if self.root_flag:
+            self.corner = tk.Canvas(
+                self.win,
+                width=18,
+                height=18,
+                bg=darker(self.container["bg"], 12),
+                highlightthickness=0,
+            )
+
+            self.corner.place(relx=1.0, x=-18, y=0)
+
+            self.corner.create_polygon(
+                18, 0, 18, 18, 0, 0, fill=darker(self.corner["bg"], 20), outline=""
+            )
+
+        # Default Font
+        self.font_name = "Courier"
+        self.font_size = 16
         # Text
         self.text = tk.Text(
             self.container,
@@ -46,13 +66,10 @@ class MemoWindow:
             borderwidth=0,
             highlightthickness=0,
             undo=True,
-            font=("Courier", 16),
+            font=(self.font_name, self.font_size),
         )
         self.text.pack(expand=True, fill="both")
 
-        # Default Font
-        self.font_name = "Courier"
-        self.font_size = 16
         # Right-click Menu
         self.menu = tk.Menu(self.win, tearoff=0)
         self.font_var = tk.StringVar(value=self.font_name)
@@ -65,7 +82,7 @@ class MemoWindow:
             "Arial",
             "Times New Roman",
         ]
-        self.all_fonts = sorted(tkfont.families())
+        self.all_fonts = sorted(f for f in tkfont.families() if not f.startswith("@"))
         font_menu = tk.Menu(self.menu, tearoff=0)
         # Common fonts
         common_menu = tk.Menu(font_menu, tearoff=0)
@@ -141,6 +158,12 @@ class MemoWindow:
             self.bg_color = color[1]
             self.text.config(bg=self.bg_color)
             self.container.config(bg=self.bg_color)
+            if self.root_flag:
+                self.corner.config(bg=darker(self.bg_color, 12))
+                self.corner.delete("all")
+                self.corner.create_polygon(
+                    18, 0, 18, 18, 0, 0, fill=darker(self.corner["bg"], 20), outline=""
+                )
 
     def choose_font_color(self) -> None:
         color = colorchooser.askcolor(title="Choose Font Color")
@@ -265,6 +288,17 @@ def all_windows_hide(event=None):
 
     if MemoWindow.windows:
         MemoWindow.windows[0].win.after(0, _run)
+
+
+# Darker color
+def darker(color, amount=18):
+    color = color.lstrip("#")
+
+    r = max(0, int(color[0:2], 16) - amount)
+    g = max(0, int(color[2:4], 16) - amount)
+    b = max(0, int(color[4:6], 16) - amount)
+
+    return f"#{r:02x}{g:02x}{b:02x}"
 
 
 # ======================

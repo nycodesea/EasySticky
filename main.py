@@ -177,10 +177,10 @@ class MemoWindow:
             self.text.config(bg=self.bg_color)
             self.container.config(bg=self.bg_color)
             if self.root_flag:
-                self.corner.config(bg=darker(self.bg_color, 14))
+                self.corner.config(bg=darker(self.bg_color, 12))
                 self.corner.delete("all")
                 self.corner.create_polygon(
-                    0, 0, 18, 0, 0, 18, fill=darker(self.bg_color, 20), outline=""
+                    18, 0, 18, 18, 0, 0, fill=darker(self.corner["bg"], 20), outline=""
                 )
 
     def choose_font_color(self) -> None:
