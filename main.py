@@ -42,10 +42,10 @@ class MemoWindow:
                 highlightthickness=0,
             )
 
-            self.corner.place(x=0, y=0)
+            self.corner.place(relx=1.0, x=-18, y=0)
 
             self.corner.create_polygon(
-                0, 0, 18, 0, 0, 18, fill=darker(self.corner["bg"], 20), outline=""
+                18, 0, 18, 18, 0, 0, fill=darker(self.corner["bg"], 20), outline=""
             )
 
         # Default font
