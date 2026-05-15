@@ -192,15 +192,16 @@ class MemoWindow:
     # focus
     def force_focus(self):
         self.win.overrideredirect(False)
-        self.win.update()
 
         self.win.lift()
         self.win.attributes("-topmost", True)
+        self.win.update_idletasks()
 
-        self.text.focus_set()
+        self.win.focus_force()
+        self.text.focus_force()
 
-        self.win.after(50, lambda: self.win.attributes("-topmost", self.topmost))
-        self.win.after(100, lambda: self.win.overrideredirect(True))
+        self.win.after(50, lambda: self.win.overrideredirect(True))
+        self.win.after(100, lambda: self.win.attributes("-topmost", self.topmost))
 
     # font
     def set_font(self, font):
