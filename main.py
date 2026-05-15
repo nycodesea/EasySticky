@@ -29,7 +29,7 @@ class MemoWindow:
         self.win.attributes("-topmost", self.topmost)
 
         # Padding
-        self.container = tk.Frame(self.win, bg="#e4e093", padx=5, pady=5)
+        self.container = tk.Frame(self.win, bg="#ffff80", padx=5, pady=5)
         self.container.pack(expand=True, fill="both")
 
         # root marker
@@ -49,13 +49,13 @@ class MemoWindow:
             )
 
         # Default font
-        self.font_name = "Courier"
-        self.font_size = 16
+        self.font_name = "Yu Gothic Medium"
+        self.font_size = 18
         # Text
         self.text = tk.Text(
             self.container,
             wrap="word",
-            bg="#e4e093",
+            bg="#ffff80",
             fg="#000000",
             insertbackground="black",
             borderwidth=0,
@@ -355,4 +355,5 @@ if __name__ == "__main__":
     app = MemoWindow()
     # Toggle all windows key
     keyboard.add_hotkey("ctrl+Shift+h", all_windows_show)
+    keyboard.add_hotkey("ctrl+Shift+z", all_windows_show)
     app.win.mainloop()
