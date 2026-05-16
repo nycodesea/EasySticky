@@ -29,7 +29,7 @@ class MemoWindow:
         self.win.attributes("-topmost", self.topmost)
 
         # Padding
-        self.container = tk.Frame(self.win, bg="#ffff80", padx=5, pady=5)
+        self.container = tk.Frame(self.win, bg="#e4e093", padx=5, pady=5)
         self.container.pack(expand=True, fill="both")
 
         # root marker
@@ -55,7 +55,7 @@ class MemoWindow:
         self.text = tk.Text(
             self.container,
             wrap="word",
-            bg="#ffff80",
+            bg="#e4e093",
             fg="#000000",
             insertbackground="black",
             borderwidth=0,
