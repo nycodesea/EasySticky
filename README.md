@@ -2,8 +2,8 @@
 
 A lightweight and simple sticky note app built with Tkinter.
 
-Supports multiple windows, always-on-top mode, and auto-save functionality.
-Perfect for taking notes while watching full-screen videos!!
+Supports multiple windows, always-on-top mode, and auto-save functionality.  
+Perfect for taking notes while watching full-screen videos!
 
 ---
 
