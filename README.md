@@ -1,14 +1,15 @@
 # EasySticky
 
-A simple and lightweight sticky notes app built with Tkinter.
+A lightweight and simple sticky note app built with Tkinter.
 
 Supports multiple windows, always-on-top mode, and auto-save functionality.
+Perfect for taking notes while watching full-screen videos!
 
 ---
 
 ## 🖼️ Screenshot
 
-![EasySticky Screenshot](assets/screenshot.png)
+![EasySticky Screenshot](assets/screenshot2.png)
 
 ---
 
@@ -39,7 +40,7 @@ python main.py
 * **Ctrl + T** : Toggle always-on-top
 * **Ctrl + N** : Open new memo window
 * **Ctrl + Q** : Close window (or exit app if root)
-* **Ctrl + Shift + H** : Show(for WIN) / Hide all windows
+* **Ctrl + Shift + H / Z** : Show(Windows only) / Hide all windows
 
 ### Mouse
 
@@ -52,7 +53,7 @@ python main.py
 
 ## 💾 Auto Save
 
-The first window opened (root window) is treated specially:
+The first window opened (marked with a folded corner) is treated as a root window.
 
 * Automatically saved to `autosave_0.txt`
 * Restored when the app restarts
@@ -76,16 +77,16 @@ pip install keyboard
 
 ## 🛠️ Future Plans
 
-* UI customization (colors, fonts)
+* ~~UI customization (colors, fonts)~~
+* ~~Linux version~~
 * Toggle visibility of control panels
 * Configurable auto-save
-* Linux version
 ---
 
 ## ⬇️ Download
 
-Download the latest version from the Releases page:
-https://github.com/nycodesea/EasySticky/releases
+Download the latest version from the [Releases](https://github.com/nycodesea/EasySticky/releases) page:
+
 
 ---
 
