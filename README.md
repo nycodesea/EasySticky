@@ -48,6 +48,7 @@ python main.py
 * **Drag bottom-right** : Resize window
 * **Click top-right** : Close window
 * **Right Click** : Setting menu
+* **Control - Click** on URL-text : Open link
 
 ---
 
