@@ -4,6 +4,10 @@ from tkinter import colorchooser
 import tkinter.font as tkfont
 from tkinter import filedialog
 import keyboard
+import re
+import webbrowser
+
+URL_PATTERN = r"https?://[^\s]+"
 
 
 class MemoWindow:
@@ -299,6 +303,49 @@ class MemoWindow:
     def stop_resize(self, event):
         self.resizing = False
 
+    # URL link
+    # Update link jump
+    def enter_link(self, event):
+        self.text.config(cursor="hand2")
+
+    def leave_link(self, event):
+        self.text.config(cursor="xterm")
+
+    def update_links(self):
+        self.text.tag_remove("link", "1.0", tk.END)
+
+        content = self.text.get("1.0", tk.END)
+
+        for match in re.finditer(URL_PATTERN, content):
+            start = f"1.0+{match.start()}c"
+            end = f"1.0+{match.end()}c"
+
+            self.text.tag_add("link", start, end)
+
+        self.text.tag_config("link", foreground="#4ea3ff", underline=True)
+        self.text.tag_bind("link", "<Control-Button-1>", self.open_link)
+        self.text.tag_bind("link", "<Enter>", self.enter_link)
+        self.text.tag_bind("link", "<Leave>", self.leave_link)
+
+    def open_link(self, event):
+        index = self.text.index(f"@{event.x},{event.y}")
+
+        for tag_range in self.text.tag_ranges("link"):
+            pass
+
+        ranges = self.text.tag_ranges("link")
+
+        for i in range(0, len(ranges), 2):
+            start = ranges[i]
+            end = ranges[i + 1]
+
+            if self.text.compare(index, ">=", start) and self.text.compare(
+                index, "<", end
+            ):
+                url = self.text.get(start, end)
+                webbrowser.open(url)
+                break
+
     # ======================
     # Key Bindings
     # ======================
@@ -316,6 +363,8 @@ class MemoWindow:
         self.grip.bind("<Button-1>", self.start_resize)
         self.grip.bind("<B1-Motion>", self.do_resize)
         self.grip.bind("<ButtonRelease-1>", self.stop_resize)
+
+        self.text.bind("<Leave>", lambda e: self.update_links())
 
 
 # Toggle all windows show/hide by Ctrl+Shift+H
