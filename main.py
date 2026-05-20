@@ -106,9 +106,9 @@ class MemoWindow:
             "Times New Roman",
         ]
         self.all_fonts = sorted(f for f in tkfont.families() if not f.startswith("@"))
-        font_menu = tk.Menu(self.menu, tearoff=0)
+        self.font_menu = tk.Menu(self.menu, tearoff=0)
         # Common fonts
-        common_menu = tk.Menu(font_menu, tearoff=0)
+        common_menu = tk.Menu(self.font_menu, tearoff=0)
         for f in self.common_fonts:
             common_menu.add_radiobutton(
                 label=f,
@@ -117,10 +117,10 @@ class MemoWindow:
                 value=f,
                 command=lambda f=f: self.set_font(f),
             )
-        font_menu.add_cascade(label="Common Fonts", menu=common_menu)
+        self.font_menu.add_cascade(label="Common Fonts", menu=common_menu)
 
         # All fonts
-        all_menu = tk.Menu(font_menu, tearoff=0)
+        all_menu = tk.Menu(self.font_menu, tearoff=0)
         for f in self.all_fonts:
             all_menu.add_radiobutton(
                 label=f,
@@ -129,30 +129,32 @@ class MemoWindow:
                 value=f,
                 command=lambda f=f: self.set_font(f),
             )
-        font_menu.add_cascade(label="All Fonts", menu=all_menu)
-        self.menu.add_cascade(label="Font", menu=font_menu)
+        self.font_menu.add_cascade(label="All Fonts", menu=all_menu)
+        self.menu.add_cascade(label="Font", menu=self.font_menu)
 
         # Size
         self.size_var = tk.IntVar(value=self.font_size)
-        size_menu = tk.Menu(self.menu, tearoff=0)
+        self.size_menu = tk.Menu(self.menu, tearoff=0)
         for s in [10, 12, 14, 16, 18, 20, 24]:
-            size_menu.add_radiobutton(
+            self.size_menu.add_radiobutton(
                 label=str(s),
                 variable=self.size_var,
                 value=s,
                 command=lambda s=s: self.set_size(s),
             )
 
-        self.menu.add_cascade(label="Size", menu=size_menu)
+        self.menu.add_cascade(label="Size", menu=self.size_menu)
         # --- bind ---
         self.bind_events()
 
         # Color settings
-        color_menu = tk.Menu(self.menu, tearoff=0)
+        self.color_menu = tk.Menu(self.menu, tearoff=0)
 
-        color_menu.add_command(label="Background Color", command=self.choose_bg_color)
-        color_menu.add_command(label="Font Color", command=self.choose_font_color)
-        self.menu.add_cascade(label="Color", menu=color_menu)
+        self.color_menu.add_command(
+            label="Background Color", command=self.choose_bg_color
+        )
+        self.color_menu.add_command(label="Font Color", command=self.choose_font_color)
+        self.menu.add_cascade(label="Color", menu=self.color_menu)
 
         # Add to Window list
         MemoWindow.windows.append(self)
@@ -225,6 +227,38 @@ class MemoWindow:
     def show_menu(self, event=None):
         self.font_var.set(self.font_name)
         self.size_var.set(self.font_size)
+
+        index = self.text.index(f"@{event.x},{event.y}")
+
+        ranges = self.text.tag_ranges("link")
+
+        url = None
+
+        for i in range(0, len(ranges), 2):
+            start = ranges[i]
+            end = ranges[i + 1]
+
+            if self.text.compare(index, ">=", start) and self.text.compare(
+                index, "<", end
+            ):
+                url = self.text.get(start, end)
+                break
+
+        self.menu.delete(0, tk.END)
+
+        # link menu
+        if url:
+            self.menu.add_command(
+                label="Open Link",
+                command=lambda u=url: webbrowser.open(u),
+            )
+
+            self.menu.add_separator()
+        # normal menu
+        self.menu.add_cascade(label="Font", menu=self.font_menu)
+        self.menu.add_cascade(label="Size", menu=self.size_menu)
+        self.menu.add_cascade(label="Color", menu=self.color_menu)
+
         self.menu.tk_popup(event.x_root, event.y_root)
 
     # Save Ctrl+S

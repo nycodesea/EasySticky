@@ -9,6 +9,8 @@
   - < Drag window > : Move window
   - < Click Top-Right > : Quit window
   - < Drag Bottom-Right > : Resize window
+  - < Right Click > : Open configure menu
+  - < Control - Click > on URL : Open link
 
 First opened window is special: root window (usually this window).
 root window automatically saved to "autosave_0.txt", and will be opend when restart.
