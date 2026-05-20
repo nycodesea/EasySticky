@@ -1,8 +1,12 @@
-# EasySticky_linux_v1.2
+# EasySticky_linux_v1.4
 import tkinter as tk
+from tkinter import colorchooser
 import tkinter.font as tkfont
 from tkinter import filedialog
-from tkinter import colorchooser
+import re
+import webbrowser
+
+URL_PATTERN = r"https?://[^\s]+"
 
 
 class MemoWindow:
@@ -22,7 +26,7 @@ class MemoWindow:
         offset = len(MemoWindow.windows) * 30
         self.win.geometry(f"400x500+{100 + offset}+{100 + offset}")
         # self.win.overrideredirect(True)
-        self.win.title("")
+        self.win.title("EasySticky")
         self.win.configure(bg="#e4e093")
 
         # Status
@@ -54,7 +58,7 @@ class MemoWindow:
             )
 
         # Default Font
-        self.font_name = "Courier"
+        self.font_name = "Yu Gothic Medium"
         self.font_size = 16
         # Text
         self.text = tk.Text(
@@ -83,9 +87,9 @@ class MemoWindow:
             "Times New Roman",
         ]
         self.all_fonts = sorted(f for f in tkfont.families() if not f.startswith("@"))
-        font_menu = tk.Menu(self.menu, tearoff=0)
+        self.font_menu = tk.Menu(self.menu, tearoff=0)
         # Common fonts
-        common_menu = tk.Menu(font_menu, tearoff=0)
+        common_menu = tk.Menu(self.font_menu, tearoff=0)
         for f in self.common_fonts:
             common_menu.add_radiobutton(
                 label=f,
@@ -94,11 +98,10 @@ class MemoWindow:
                 value=f,
                 command=lambda f=f: self.set_font(f),
             )
-        font_menu.add_cascade(label="Common Fonts", menu=common_menu)
+        self.font_menu.add_cascade(label="Common Fonts", menu=common_menu)
 
         # All fonts
-        all_menu = tk.Menu(font_menu, tearoff=0)
-        font_menu.add_separator()
+        all_menu = tk.Menu(self.font_menu, tearoff=0)
         for f in self.all_fonts:
             all_menu.add_radiobutton(
                 label=f,
@@ -107,30 +110,32 @@ class MemoWindow:
                 value=f,
                 command=lambda f=f: self.set_font(f),
             )
-        font_menu.add_cascade(label="All Fonts", menu=all_menu)
-        self.menu.add_cascade(label="Font", menu=font_menu)
+        self.font_menu.add_cascade(label="All Fonts", menu=all_menu)
+        self.menu.add_cascade(label="Font", menu=self.font_menu)
 
         # Size
         self.size_var = tk.IntVar(value=self.font_size)
-        size_menu = tk.Menu(self.menu, tearoff=0)
+        self.size_menu = tk.Menu(self.menu, tearoff=0)
         for s in [10, 12, 14, 16, 18, 20, 24]:
-            size_menu.add_radiobutton(
+            self.size_menu.add_radiobutton(
                 label=str(s),
                 variable=self.size_var,
                 value=s,
                 command=lambda s=s: self.set_size(s),
             )
 
-        self.menu.add_cascade(label="Size", menu=size_menu)
+        self.menu.add_cascade(label="Size", menu=self.size_menu)
         # --- bind ---
         self.bind_events()
 
         # Color settings
-        color_menu = tk.Menu(self.menu, tearoff=0)
+        self.color_menu = tk.Menu(self.menu, tearoff=0)
 
-        color_menu.add_command(label="Background Color", command=self.choose_bg_color)
-        color_menu.add_command(label="Font Color", command=self.choose_font_color)
-        self.menu.add_cascade(label="Color", menu=color_menu)
+        self.color_menu.add_command(
+            label="Background Color", command=self.choose_bg_color
+        )
+        self.color_menu.add_command(label="Font Color", command=self.choose_font_color)
+        self.menu.add_cascade(label="Color", menu=self.color_menu)
 
         # Add to Window list
         MemoWindow.windows.append(self)
@@ -202,6 +207,38 @@ class MemoWindow:
     def show_menu(self, event=None):
         self.font_var.set(self.font_name)
         self.size_var.set(self.font_size)
+
+        index = self.text.index(f"@{event.x},{event.y}")
+
+        ranges = self.text.tag_ranges("link")
+
+        url = None
+
+        for i in range(0, len(ranges), 2):
+            start = ranges[i]
+            end = ranges[i + 1]
+
+            if self.text.compare(index, ">=", start) and self.text.compare(
+                index, "<", end
+            ):
+                url = self.text.get(start, end)
+                break
+
+        self.menu.delete(0, tk.END)
+
+        # link menu
+        if url:
+            self.menu.add_command(
+                label="Open Link",
+                command=lambda u=url: webbrowser.open(u),
+            )
+
+            self.menu.add_separator()
+        # normal menu
+        self.menu.add_cascade(label="Font", menu=self.font_menu)
+        self.menu.add_cascade(label="Size", menu=self.size_menu)
+        self.menu.add_cascade(label="Color", menu=self.color_menu)
+
         self.menu.tk_popup(event.x_root, event.y_root)
 
     # Save Ctrl+S
@@ -257,6 +294,49 @@ class MemoWindow:
         y = self.win.winfo_pointery() - self.win.y
         self.win.geometry(f"+{x}+{y}")
 
+    # URL link
+    # Update link jump
+    def enter_link(self, event):
+        self.text.config(cursor="hand2")
+
+    def leave_link(self, event):
+        self.text.config(cursor="xterm")
+
+    def update_links(self):
+        self.text.tag_remove("link", "1.0", tk.END)
+
+        content = self.text.get("1.0", tk.END)
+
+        for match in re.finditer(URL_PATTERN, content):
+            start = f"1.0+{match.start()}c"
+            end = f"1.0+{match.end()}c"
+
+            self.text.tag_add("link", start, end)
+
+        self.text.tag_config("link", foreground="#4ea3ff", underline=True)
+        self.text.tag_bind("link", "<Control-Button-1>", self.open_link)
+        self.text.tag_bind("link", "<Enter>", self.enter_link)
+        self.text.tag_bind("link", "<Leave>", self.leave_link)
+
+    def open_link(self, event):
+        index = self.text.index(f"@{event.x},{event.y}")
+
+        for tag_range in self.text.tag_ranges("link"):
+            pass
+
+        ranges = self.text.tag_ranges("link")
+
+        for i in range(0, len(ranges), 2):
+            start = ranges[i]
+            end = ranges[i + 1]
+
+            if self.text.compare(index, ">=", start) and self.text.compare(
+                index, "<", end
+            ):
+                url = self.text.get(start, end)
+                webbrowser.open(url)
+                break
+
     # ======================
     # Key Bindings
     # ======================
@@ -266,12 +346,12 @@ class MemoWindow:
         self.win.bind("<Control-t>", self.toggle_topmost)
         self.win.bind("<Control-n>", self.new_window)
         self.win.bind("<Control-q>", self.quit_window)
-        self.win.bind("<Control-w>", self.quit_window)
         self.text.bind("<Button-1>", self.start_move)
         self.text.bind("<B1-Motion>", self.do_move)
         self.text.bind("<Button-3>", self.show_menu)
-
+        self.text.bind("<Leave>", lambda e: self.update_links())
         self.text.bind("<Control-Shift-H>", all_windows_hide)
+        self.text.bind("<Control-Shift-Z>", all_windows_hide)
 
 
 # Hide all windows

@@ -5,7 +5,7 @@
   - < Control - T > : Toggle Top display
   - < Control - N > : New window
   - < Control - Q > : Quit widow, or application(root)
-  - < Control - Shift - H > : Hide or Open All windows
+  - < Control - Shift - H/Z > : Hide or Open All windows
   - < Drag window > : Move window
   - < Click Top-Right > : Quit window
   - < Drag Bottom-Right > : Resize window
@@ -16,3 +16,6 @@ First opened window is special: root window (usually this window).
 root window automatically saved to "autosave_0.txt", and will be opend when restart.
 ==Please keep avoid to save as "autosave_0.txt" manually.==
 The file will be Overwritten!!
+
+
+
