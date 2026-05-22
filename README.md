@@ -89,7 +89,7 @@ pip install keyboard
 ## ⬇️ Download
 
 Download the latest version from the [Releases](https://github.com/nycodesea/EasySticky/releases) page
-exe file needs easysticky.ico to be same directry!
+The executable requires `easysticky.ico` to be in the same directory.
 
 
 ---
