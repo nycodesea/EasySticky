@@ -88,7 +88,8 @@ pip install keyboard
 
 ## ⬇️ Download
 
-Download the latest version from the [Releases](https://github.com/nycodesea/EasySticky/releases) page:
+Download the latest version from the [Releases](https://github.com/nycodesea/EasySticky/releases) page
+exe file needs easysticky.ico to be same directry!
 
 
 ---
