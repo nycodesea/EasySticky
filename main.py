@@ -223,6 +223,7 @@ class MemoWindow:
             self.text.config(bg=self.bg_color)
             self.container.config(bg=self.bg_color)
             self.config["style"]["bg_color"] = self.bg_color
+            self.grip.config(bg=darker(self.bg_color, 50))
             if self.root_flag:
                 self.corner.config(bg=darker(self.bg_color, 12))
                 self.corner.delete("all")
