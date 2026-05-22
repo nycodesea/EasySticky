@@ -6,10 +6,40 @@ from tkinter import filedialog
 import keyboard
 import re
 import webbrowser
+import json
+from pathlib import Path
+
+CONFIG_PATH = Path("config.json")
 
 URL_PATTERN = r"https?://[^\s]+"
 
 
+DEFAULT_CONFIG = {
+    "window": {"width": 400, "height": 500, "always_on_top": True, "x": 100, "y": 100},
+    "style": {
+        "bg_color": "#e4e093",
+        "font_color": "#000000",
+        "font_family": "Yu Gothic Medium",
+        "font_size": 14,
+    },
+}
+
+
+def load_config():
+    if CONFIG_PATH.exists():
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    else:
+        save_config(DEFAULT_CONFIG)
+        return DEFAULT_CONFIG
+
+
+def save_config(config):
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4, ensure_ascii=False)
+
+
+# Window
 class MemoWindow:
     windows: list["MemoWindow"] = []
 
@@ -23,17 +53,24 @@ class MemoWindow:
             self.win = tk.Toplevel(root)
             self.root_flag = False
 
-        self.win.geometry("400x500+100+100")
+        # Config from json file
+        self.config = load_config()
+        self.win.geometry(
+            f"{self.config['window']['width']}x{self.config['window']['height']}+{self.config['window']['x']}+{self.config['window']['y']}"
+        )
+
         self.win.overrideredirect(True)
 
         # Status
-        self.topmost = True
+        self.topmost = self.config["window"]["always_on_top"]
         self.resizing = False
 
         self.win.attributes("-topmost", self.topmost)
 
         # Padding
-        self.container = tk.Frame(self.win, bg="#e4e093", padx=5, pady=5)
+        self.container = tk.Frame(
+            self.win, bg=self.config["style"]["bg_color"], padx=5, pady=5
+        )
         self.container.pack(expand=True, fill="both")
 
         # root marker
@@ -52,15 +89,16 @@ class MemoWindow:
                 18, 0, 18, 18, 0, 0, fill=darker(self.corner["bg"], 20), outline=""
             )
 
-        # Default font
-        self.font_name = "Yu Gothic Medium"
-        self.font_size = 18
         # Text
+        self.bg_color = self.config["style"]["bg_color"]
+        self.font_color = self.config["style"]["font_color"]
+        self.font_name = self.config["style"]["font_family"]
+        self.font_size = self.config["style"]["font_size"]
         self.text = tk.Text(
             self.container,
             wrap="word",
-            bg="#e4e093",
-            fg="#000000",
+            bg=self.bg_color,
+            fg=self.font_color,
             insertbackground="black",
             borderwidth=0,
             highlightthickness=0,
@@ -75,7 +113,9 @@ class MemoWindow:
         )
         self.close_btn.place(relx=1.0, rely=0.0, anchor="ne")
         # Resize guide panel
-        self.grip = tk.Label(self.win, width=4, height=2, bg="#938d69", cursor="hand2")
+        self.grip = tk.Label(
+            self.win, width=4, height=2, bg=darker(self.bg_color, 50), cursor="hand2"
+        )
         self.grip.place(relx=1.0, rely=1.0, anchor="se")
 
         # Hide panels
@@ -182,6 +222,7 @@ class MemoWindow:
             self.bg_color = color[1]
             self.text.config(bg=self.bg_color)
             self.container.config(bg=self.bg_color)
+            self.config["style"]["bg_color"] = self.bg_color
             if self.root_flag:
                 self.corner.config(bg=darker(self.bg_color, 12))
                 self.corner.delete("all")
@@ -194,6 +235,7 @@ class MemoWindow:
         if color[1]:
             self.font_color = color[1]
             self.text.config(fg=self.font_color)
+            self.config["style"]["font_color"] = self.font_color
 
     # focus
     def force_focus(self):
@@ -221,6 +263,8 @@ class MemoWindow:
         self.apply_font()
 
     def apply_font(self):
+        self.config["style"]["font_family"] = self.font_name
+        self.config["style"]["font_size"] = self.font_size
         self.text.config(font=(self.font_name, self.font_size))
 
     # Right-click Menu
@@ -279,19 +323,29 @@ class MemoWindow:
     # Close Ctrl+Q
     def quit_window(self, event=None):
         self.auto_save()
+        save_config(self.config)
         MemoWindow.windows.remove(self)
         self.win.destroy()
 
     # Toggle topmost Ctrl+T
     def toggle_topmost(self, event=None):
         self.topmost = not self.topmost
+        self.config["window"]["always_on_top"]
         self.win.attributes("-topmost", self.topmost)
 
     # New window Ctrl+N
     def new_window(self, event=None):
+        save_config(self.config)
+
+        self.win.update_idletasks()
+        x = self.win.winfo_x()
+        y = self.win.winfo_y()
+
+        offset_x = 30
+        offset_y = 30
         new = MemoWindow(self.win)
-        new.font_name = self.font_name
-        new.font_size = self.font_size
+        new.win.geometry(f"+{x + offset_x}+{y + offset_y}")
+
         new.size_var.set(new.font_size)
         new.apply_font()
 
@@ -312,6 +366,8 @@ class MemoWindow:
     def do_move(self, event):
         x = self.win.winfo_pointerx() - self.win.x
         y = self.win.winfo_pointery() - self.win.y
+        self.config["window"]["x"] = x
+        self.config["window"]["y"] = y
         self.win.geometry(f"+{x}+{y}")
 
     # Resize window by dragging grip
@@ -332,6 +388,8 @@ class MemoWindow:
         w = max(100, self.start_w + dx)
         h = max(100, self.start_h + dy)
 
+        self.config["window"]["width"] = w
+        self.config["window"]["height"] = h
         self.win.geometry(f"{w}x{h}")
 
     def stop_resize(self, event):

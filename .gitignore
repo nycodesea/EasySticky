@@ -10,3 +10,9 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+#temp file
+temp*.py
+
+# Setting json
+*.json
