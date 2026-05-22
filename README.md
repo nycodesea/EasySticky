@@ -9,7 +9,7 @@ Perfect for taking notes while watching full-screen videos!
 
 ## 🖼️ Screenshot
 
-![EasySticky icon Screenshot](assets/EasySticky_icon.png)
+![EasySticky icon Screenshot](assets/EasySticky.png)
 ![EasySticky Screenshot](assets/screenshot2.png)
 
 ---
