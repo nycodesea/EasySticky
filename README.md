@@ -58,6 +58,7 @@ The first window opened (marked with a folded corner) is treated as a root windo
 
 * Automatically saved to `autosave_0.txt`
 * Restored when the app restarts
+* Settings are automatically saved to `config.json`.
 
 ⚠️ **Warning**
 Do not manually edit or save to `autosave_0.txt`, as it will be overwritten.
