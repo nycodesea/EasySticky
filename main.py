@@ -52,7 +52,7 @@ class MemoWindow:
         else:
             self.win = tk.Toplevel(root)
             self.root_flag = False
-
+        self.win.iconbitmap("./easysticky.ico")
         # Config from json file
         self.config = load_config()
         self.win.geometry(

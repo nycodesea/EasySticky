@@ -21,7 +21,7 @@ class MemoWindow:
         else:
             self.win = tk.Toplevel(root)
             self.root_flag = False
-
+        self.win.iconbitmap("./easysticky.ico")
         # Position + gap
         offset = len(MemoWindow.windows) * 30
         self.win.geometry(f"400x500+{100 + offset}+{100 + offset}")
