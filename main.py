@@ -1,4 +1,4 @@
-# EasySticky v1.4
+# EasySticky v1.5
 import tkinter as tk
 from tkinter import colorchooser
 import tkinter.font as tkfont
