@@ -5,9 +5,19 @@ import tkinter.font as tkfont
 from tkinter import filedialog
 import re
 import webbrowser
+from pathlib import Path
+import sys
 
 URL_PATTERN = r"https?://[^\s]+"
 
+# Path for icon
+def resource_path(relative_path):
+    if getattr(sys, "frozen", False):
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(__file__).parent
+
+    return base_path / relative_path
 
 class MemoWindow:
     windows: list["MemoWindow"] = []
@@ -21,7 +31,9 @@ class MemoWindow:
         else:
             self.win = tk.Toplevel(root)
             self.root_flag = False
-        icon = tk.PhotoImage(file="assets/easysticky.png")
+        icon = tk.PhotoImage(
+                file=resource_path("assets/easysticky.png")
+        )
         self.win.iconphoto(True, icon)
         self.icon = icon
         # Position + gap
