@@ -210,7 +210,7 @@ class MemoWindow:
         # run autosave
         self.auto_save()
         # focus
-        self.win.after(100, self.force_focus)
+        self.win.after(10, self.force_focus)
 
     # ======================
     # Functions
@@ -249,8 +249,8 @@ class MemoWindow:
         self.win.focus_force()
         self.text.focus_force()
 
-        self.win.after(50, lambda: self.win.overrideredirect(True))
-        self.win.after(100, lambda: self.win.attributes("-topmost", self.topmost))
+        self.win.after(5, lambda: self.win.overrideredirect(True))
+        self.win.after(10, lambda: self.win.attributes("-topmost", self.topmost))
 
     # font
     def set_font(self, font):
@@ -331,7 +331,7 @@ class MemoWindow:
     # Toggle topmost Ctrl+T
     def toggle_topmost(self, event=None):
         self.topmost = not self.topmost
-        self.config["window"]["always_on_top"]
+        self.config["window"]["always_on_top"] = self.topmost
         self.win.attributes("-topmost", self.topmost)
 
     # New window Ctrl+N
