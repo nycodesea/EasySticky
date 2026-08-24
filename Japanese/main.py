@@ -45,13 +45,13 @@ class MemoWindow:
         # root or toplevel
         if root is None:
             self.win = tk.Tk()
-            # Only root window handles autosave
+            # ルートウィンドウだけが自動保存
             self.root_flag = True
         else:
             self.win = tk.Toplevel(root)
             self.root_flag = False
         self.win.iconbitmap("assets/easysticky.ico")
-        # Config from json file
+        # Config fileを読み込む
         self.config = load_config()
         self.win.geometry(
             f"{self.config['window']['width']}x{self.config['window']['height']}+{self.config['window']['x']}+{self.config['window']['y']}"
@@ -59,7 +59,7 @@ class MemoWindow:
 
         self.win.overrideredirect(True)
 
-        # Status
+        # 常に最前面機能の状態
         self.topmost = self.config["window"]["always_on_top"]
         self.resizing = False
 
@@ -105,7 +105,7 @@ class MemoWindow:
         )
         self.text.pack(expand=True, fill="both", padx=5, pady=5)
 
-        # Close panel
+        # 閉じるパネル
         self.close_btn = tk.Label(
             self.win, width=2, height=1, bg="#e4a48f", cursor="hand2"
         )
@@ -182,7 +182,7 @@ class MemoWindow:
             )
 
         self.menu.add_cascade(label="Size", menu=self.size_menu)
-        # --- bind ---
+        # キーバインド
         self.bind_events()
 
         # Color settings
@@ -213,7 +213,7 @@ class MemoWindow:
     # ======================
     # Functions
     # ======================
-    # Color Chooser
+    # 色選択
     def choose_bg_color(self) -> None:
         color = colorchooser.askcolor(title="Choose Background Color")
         if color[1]:
@@ -236,7 +236,7 @@ class MemoWindow:
             self.text.config(fg=self.font_color)
             self.config["style"]["font_color"] = self.font_color
 
-    # focus
+    # ウィンドウフォーカス
     def force_focus(self):
         self.win.overrideredirect(False)
 
@@ -289,7 +289,7 @@ class MemoWindow:
 
         self.menu.delete(0, tk.END)
 
-        # link menu
+        # urlにジャンプ
         if url:
             self.menu.add_command(
                 label="Open Link",
@@ -304,14 +304,14 @@ class MemoWindow:
 
         self.menu.tk_popup(event.x_root, event.y_root)
 
-    # Save Ctrl+S
+    # 保存 Ctrl+S
     def save_file(self, event=None):
         path = filedialog.asksaveasfilename(defaultextension=".txt")
         if path:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(self.text.get("1.0", tk.END))
 
-    # Open Ctrl+O
+    # 開く Ctrl+O
     def open_file(self, event=None):
         path = filedialog.askopenfilename()
         if path:
@@ -319,20 +319,20 @@ class MemoWindow:
                 self.text.delete("1.0", tk.END)
                 self.text.insert(tk.END, f.read())
 
-    # Close Ctrl+Q
+    # 閉じる Ctrl+Q
     def quit_window(self, event=None):
         self.auto_save()
         save_config(self.config)
         MemoWindow.windows.remove(self)
         self.win.destroy()
 
-    # Toggle topmost Ctrl+T
+    # 最前面切り替え Ctrl+T
     def toggle_topmost(self, event=None):
         self.topmost = not self.topmost
         self.config["window"]["always_on_top"] = self.topmost
         self.win.attributes("-topmost", self.topmost)
 
-    # New window Ctrl+N
+    # 新規ウィンドウ Ctrl+N
     def new_window(self, event=None):
         save_config(self.config)
 
@@ -348,7 +348,7 @@ class MemoWindow:
         new.size_var.set(new.font_size)
         new.apply_font()
 
-    # Auto Save restricted to root window by self.root_flag
+    # self.root_flagによって自動保存はルートウィンドウのみに限定しています。
     def auto_save(self):
         if not self.root_flag:
             return
@@ -357,7 +357,7 @@ class MemoWindow:
             f.write(self.text.get("1.0", tk.END))
         self.win.after(5000, self.auto_save)
 
-    # Move window by dragging text area
+    # テキストエリアをドラッグすることでウィンドウの移動
     def start_move(self, event):
         self.win.x = event.x
         self.win.y = event.y
@@ -369,7 +369,7 @@ class MemoWindow:
         self.config["window"]["y"] = y
         self.win.geometry(f"+{x}+{y}")
 
-    # Resize window by dragging grip
+    # 右下のパネルをドラッグしてウィンドウサイズ変更
     def start_resize(self, event):
         self.resizing = True
         self.start_x = event.x_root
@@ -438,7 +438,7 @@ class MemoWindow:
                 break
 
     # ======================
-    # Key Bindings
+    # キーバインド
     # ======================
     def bind_events(self):
         self.win.bind("<Control-s>", self.save_file)
@@ -458,7 +458,7 @@ class MemoWindow:
         self.text.bind("<Leave>", lambda e: self.update_links())
 
 
-# Toggle all windows show/hide by Ctrl+Shift+H
+# Ctrl+Shift+H　全ウィンドウの表示/非表示切り替え
 all_windows_visible = True
 
 

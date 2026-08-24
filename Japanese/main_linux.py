@@ -1,16 +1,18 @@
-# EasySticky v1.5
+# EasySticky_linux_v1.5
 import tkinter as tk
 from tkinter import colorchooser
 import tkinter.font as tkfont
 from tkinter import filedialog
-import keyboard
 import re
 import webbrowser
-import json
 from pathlib import Path
+import sys
+import json
 
 CONFIG_PATH = Path("config.json")
+
 URL_PATTERN = r"https?://[^\s]+"
+
 
 DEFAULT_CONFIG = {
     "window": {"width": 400, "height": 500, "always_on_top": True, "x": 100, "y": 100},
@@ -27,6 +29,7 @@ def load_config():
     if CONFIG_PATH.exists():
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
+
     else:
         save_config(DEFAULT_CONFIG)
         return DEFAULT_CONFIG
@@ -35,6 +38,16 @@ def load_config():
 def save_config(config):
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
+
+
+# Path for icon
+def resource_path(relative_path):
+    if getattr(sys, "frozen", False):
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(__file__).parent
+
+    return base_path / relative_path
 
 
 # Window
@@ -47,17 +60,21 @@ class MemoWindow:
             self.win = tk.Tk()
             # Only root window handles autosave
             self.root_flag = True
+            self.win.protocol("WM_DELETE_WINDOW", self.on_close)
         else:
             self.win = tk.Toplevel(root)
             self.root_flag = False
-        self.win.iconbitmap("assets/easysticky.ico")
+        icon = tk.PhotoImage(file=resource_path("assets/easysticky.png"))
+        self.win.iconphoto(True, icon)
+        self.icon = icon
+
         # Config from json file
         self.config = load_config()
         self.win.geometry(
             f"{self.config['window']['width']}x{self.config['window']['height']}+{self.config['window']['x']}+{self.config['window']['y']}"
         )
-
-        self.win.overrideredirect(True)
+        self.win.title("EasySticky")
+        self.win.configure(bg="#e4e093")
 
         # Status
         self.topmost = self.config["window"]["always_on_top"]
@@ -67,7 +84,12 @@ class MemoWindow:
 
         # Padding
         self.container = tk.Frame(
-            self.win, bg=self.config["style"]["bg_color"], padx=5, pady=5
+            self.win,
+            bg=self.config["style"]["bg_color"],
+            padx=5,
+            pady=5,
+            bd=0,
+            highlightthickness=0,
         )
         self.container.pack(expand=True, fill="both")
 
@@ -87,49 +109,22 @@ class MemoWindow:
                 18, 0, 18, 18, 0, 0, fill=darker(self.corner["bg"], 20), outline=""
             )
 
-        # Text
-        self.bg_color = self.config["style"]["bg_color"]
-        self.font_color = self.config["style"]["font_color"]
+        # Apply Font
         self.font_name = self.config["style"]["font_family"]
         self.font_size = self.config["style"]["font_size"]
+        # Text
         self.text = tk.Text(
             self.container,
             wrap="word",
-            bg=self.bg_color,
-            fg=self.font_color,
+            bg=self.config["style"]["bg_color"],
+            fg=self.config["style"]["font_color"],
             insertbackground="black",
             borderwidth=0,
             highlightthickness=0,
             undo=True,
             font=(self.font_name, self.font_size),
         )
-        self.text.pack(expand=True, fill="both", padx=5, pady=5)
-
-        # Close panel
-        self.close_btn = tk.Label(
-            self.win, width=2, height=1, bg="#e4a48f", cursor="hand2"
-        )
-        self.close_btn.place(relx=1.0, rely=0.0, anchor="ne")
-        # Resize guide panel
-        self.grip = tk.Label(
-            self.win, width=4, height=2, bg=darker(self.bg_color, 50), cursor="hand2"
-        )
-        self.grip.place(relx=1.0, rely=1.0, anchor="se")
-
-        # Hide panels
-        self.close_btn.place_forget()
-        self.grip.place_forget()
-
-        def show_panels(event=None):
-            self.close_btn.place(relx=1.0, rely=0.0, anchor="ne")
-            self.grip.place(relx=1.0, rely=1.0, anchor="se")
-
-        def hide_panels(event=None):
-            self.close_btn.place_forget()
-            self.grip.place_forget()
-
-        self.win.bind("<Enter>", show_panels)
-        self.win.bind("<Leave>", hide_panels)
+        self.text.pack(expand=True, fill="both")
 
         # Right-click Menu
         self.menu = tk.Menu(self.win, tearoff=0)
@@ -208,55 +203,68 @@ class MemoWindow:
         # run autosave
         self.auto_save()
         # focus
-        self.win.after(10, self.force_focus)
+        self.win.after(100, self.force_focus)
 
     # ======================
     # Functions
     # ======================
     # Color Chooser
+    def on_close(self):
+        if self.root_flag:
+            self.config["window"]["width"] = self.win.winfo_width()
+            self.config["window"]["height"] = self.win.winfo_height()
+            self.config["window"]["x"] = self.win.winfo_x()
+            self.config["window"]["y"] = self.win.winfo_y()
+            save_config(self.config)
+            self.auto_save()  # Save before closing
+            MemoWindow.windows.remove(self)
+            self.win.destroy()
+        else:
+            self.quit_window()
+
     def choose_bg_color(self) -> None:
         color = colorchooser.askcolor(title="Choose Background Color")
         if color[1]:
+            self.config["style"]["bg_color"] = color[1]
             self.bg_color = color[1]
             self.text.config(bg=self.bg_color)
             self.container.config(bg=self.bg_color)
-            self.config["style"]["bg_color"] = self.bg_color
-            self.grip.config(bg=darker(self.bg_color, 50))
             if self.root_flag:
                 self.corner.config(bg=darker(self.bg_color, 12))
                 self.corner.delete("all")
                 self.corner.create_polygon(
-                    18, 0, 18, 18, 0, 0, fill=darker(self.corner["bg"], 20), outline=""
+                    18, 0, 18, 18, 0, 0, fill=darker(self.bg_color, 32), outline=""
                 )
 
     def choose_font_color(self) -> None:
         color = colorchooser.askcolor(title="Choose Font Color")
         if color[1]:
+            self.config["style"]["font_color"] = color[1]
             self.font_color = color[1]
             self.text.config(fg=self.font_color)
-            self.config["style"]["font_color"] = self.font_color
 
     # focus
     def force_focus(self):
-        self.win.overrideredirect(False)
+        # self.win.overrideredirect(False)
+        self.win.update()
 
         self.win.lift()
         self.win.attributes("-topmost", True)
-        self.win.update_idletasks()
 
-        self.win.focus_force()
-        self.text.focus_force()
+        self.text.focus_set()
 
-        self.win.after(5, lambda: self.win.overrideredirect(True))
-        self.win.after(10, lambda: self.win.attributes("-topmost", self.topmost))
+        self.win.after(50, lambda: self.win.attributes("-topmost", self.topmost))
+        # self.win.after(100, lambda: self.win.overrideredirect(True))
 
     # font
     def set_font(self, font):
+        self.config["style"]["font_family"] = font
         self.font_name = font
         self.font_var.set(font)
         self.apply_font()
 
     def set_size(self, size):
+        self.config["style"]["font_size"] = size
         self.font_size = size
         self.size_var.set(size)
         self.apply_font()
@@ -321,6 +329,10 @@ class MemoWindow:
 
     # Close Ctrl+Q
     def quit_window(self, event=None):
+        self.config["window"]["width"] = self.win.winfo_width()
+        self.config["window"]["height"] = self.win.winfo_height()
+        self.config["window"]["x"] = self.win.winfo_x()
+        self.config["window"]["y"] = self.win.winfo_y()
         self.auto_save()
         save_config(self.config)
         MemoWindow.windows.remove(self)
@@ -335,7 +347,6 @@ class MemoWindow:
     # New window Ctrl+N
     def new_window(self, event=None):
         save_config(self.config)
-
         self.win.update_idletasks()
         x = self.win.winfo_x()
         y = self.win.winfo_y()
@@ -343,8 +354,9 @@ class MemoWindow:
         offset_x = 30
         offset_y = 30
         new = MemoWindow(self.win)
+        new.font_name = self.font_name
+        new.font_size = self.font_size
         new.win.geometry(f"+{x + offset_x}+{y + offset_y}")
-
         new.size_var.set(new.font_size)
         new.apply_font()
 
@@ -368,31 +380,6 @@ class MemoWindow:
         self.config["window"]["x"] = x
         self.config["window"]["y"] = y
         self.win.geometry(f"+{x}+{y}")
-
-    # Resize window by dragging grip
-    def start_resize(self, event):
-        self.resizing = True
-        self.start_x = event.x_root
-        self.start_y = event.y_root
-        self.start_w = self.win.winfo_width()
-        self.start_h = self.win.winfo_height()
-
-    def do_resize(self, event):
-        if not self.resizing:
-            return
-
-        dx = event.x_root - self.start_x
-        dy = event.y_root - self.start_y
-
-        w = max(100, self.start_w + dx)
-        h = max(100, self.start_h + dy)
-
-        self.config["window"]["width"] = w
-        self.config["window"]["height"] = h
-        self.win.geometry(f"{w}x{h}")
-
-    def stop_resize(self, event):
-        self.resizing = False
 
     # URL link
     # Update link jump
@@ -446,35 +433,28 @@ class MemoWindow:
         self.win.bind("<Control-t>", self.toggle_topmost)
         self.win.bind("<Control-n>", self.new_window)
         self.win.bind("<Control-q>", self.quit_window)
-        self.close_btn.bind("<Button-1>", self.quit_window)
         self.text.bind("<Button-1>", self.start_move)
         self.text.bind("<B1-Motion>", self.do_move)
         self.text.bind("<Button-3>", self.show_menu)
-
-        self.grip.bind("<Button-1>", self.start_resize)
-        self.grip.bind("<B1-Motion>", self.do_resize)
-        self.grip.bind("<ButtonRelease-1>", self.stop_resize)
-
         self.text.bind("<Leave>", lambda e: self.update_links())
+        self.text.bind("<Control-Shift-H>", all_windows_hide)
+        self.text.bind("<Control-Shift-Z>", all_windows_hide)
 
 
-# Toggle all windows show/hide by Ctrl+Shift+H
-all_windows_visible = True
-
-
-def all_windows_show(event=None):
+# Hide all windows
+def all_windows_hide(event=None):
     def _run():
-        global all_windows_visible
-        all_windows_visible = not all_windows_visible
-        for i, w in enumerate(MemoWindow.windows):
-            if all_windows_visible:
+        any_visible = any(w.win.winfo_viewable() for w in MemoWindow.windows)
+        if any_visible:
+            for w in MemoWindow.windows:
+                w.win.iconify()
+        else:
+            for w in MemoWindow.windows:
                 w.win.deiconify()
                 w.force_focus()
-            else:
-                w.win.overrideredirect(False)
-                w.win.iconify()
 
-    MemoWindow.windows[0].win.after(0, _run)
+    if MemoWindow.windows:
+        MemoWindow.windows[0].win.after(0, _run)
 
 
 # Darker color
@@ -493,7 +473,4 @@ def darker(color, amount=18):
 # ======================
 if __name__ == "__main__":
     app = MemoWindow()
-    # Toggle all windows key
-    keyboard.add_hotkey("ctrl+Shift+h", all_windows_show)
-    keyboard.add_hotkey("ctrl+Shift+z", all_windows_show)
     app.win.mainloop()
