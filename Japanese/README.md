@@ -9,7 +9,7 @@ Tkinterで作られた、軽量でシンプルな付箋メモアプリです。
 
 ## 🖼️ スクリーンショット
 
-![EasySticky icon Screenshot](assets/EasySticky.png)
+![EasySticky icon Screenshot](assets/easysticky.png)
 ![EasySticky Screenshot](assets/screenshot2.png)
 
 ---
