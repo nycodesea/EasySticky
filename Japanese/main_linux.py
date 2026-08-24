@@ -312,14 +312,14 @@ class MemoWindow:
 
         self.menu.tk_popup(event.x_root, event.y_root)
 
-    # Save Ctrl+S
+    # 保存 Ctrl+S
     def save_file(self, event=None):
         path = filedialog.asksaveasfilename(defaultextension=".txt")
         if path:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(self.text.get("1.0", tk.END))
 
-    # Open Ctrl+O
+    # 開く Ctrl+O
     def open_file(self, event=None):
         path = filedialog.askopenfilename()
         if path:
@@ -327,7 +327,7 @@ class MemoWindow:
                 self.text.delete("1.0", tk.END)
                 self.text.insert(tk.END, f.read())
 
-    # Close Ctrl+Q
+    # 閉じる Ctrl+Q
     def quit_window(self, event=None):
         self.config["window"]["width"] = self.win.winfo_width()
         self.config["window"]["height"] = self.win.winfo_height()
@@ -338,13 +338,13 @@ class MemoWindow:
         MemoWindow.windows.remove(self)
         self.win.destroy()
 
-    # Toggle topmost Ctrl+T
+    # 最前面表示 Ctrl+T
     def toggle_topmost(self, event=None):
         self.topmost = not self.topmost
         self.config["window"]["always_on_top"] = self.topmost
         self.win.attributes("-topmost", self.topmost)
 
-    # New window Ctrl+N
+    # 新規ウィンドウ Ctrl+N
     def new_window(self, event=None):
         save_config(self.config)
         self.win.update_idletasks()
@@ -360,7 +360,7 @@ class MemoWindow:
         new.size_var.set(new.font_size)
         new.apply_font()
 
-    # Auto Save restricted to root window by self.root_flag
+    # self.root_flagによって自動保存はルートウィンドウのみに限定しています。
     def auto_save(self):
         if not self.root_flag:
             return
@@ -369,7 +369,7 @@ class MemoWindow:
             f.write(self.text.get("1.0", tk.END))
         self.win.after(5000, self.auto_save)
 
-    # Move window by dragging text area
+    # テキストエリアをドラッグすることでウィンドウの移動
     def start_move(self, event):
         self.win.x = event.x
         self.win.y = event.y
@@ -425,7 +425,7 @@ class MemoWindow:
                 break
 
     # ======================
-    # Key Bindings
+    # キーバインド
     # ======================
     def bind_events(self):
         self.win.bind("<Control-s>", self.save_file)
@@ -441,7 +441,7 @@ class MemoWindow:
         self.text.bind("<Control-Shift-Z>", all_windows_hide)
 
 
-# Hide all windows
+# Ctrl+Shift+H　全ウィンドウの非表示
 def all_windows_hide(event=None):
     def _run():
         any_visible = any(w.win.winfo_viewable() for w in MemoWindow.windows)
